@@ -35,3 +35,6 @@ class TestValidadores(unittest.TestCase):
         quantidade = -5
         with self.assertRaises(ValueError):
             validar_quantidade(quantidade)
+
+if __name__ == "__main__":
+    unittest.main()
