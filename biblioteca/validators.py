@@ -2,10 +2,16 @@ def validar_isbn(isbn):
     if isbn is None:
         raise ValueError("ISBN é obrigatório.")
 
-    isbn = str(isbn).strip()
+    somente_digitos = isbn.replace("-", "")
 
     if not isbn:
         raise ValueError("ISBN não pode estar vazio.")
+
+    if not somente_digitos.isdigit():
+        raise ValueError("ISBN deve conter apenas dígitos.")
+
+    if len(somente_digitos) not in [10, 13]:
+        raise ValueError("ISBN deve ter 10 ou 13 dígitos.")
 
     return isbn
 
@@ -14,7 +20,8 @@ def validar_titulo(titulo):
     if titulo is None or not titulo.strip():
         raise ValueError("Título é obrigatório.")
 
-    return titulo.strip()
+    partes = titulo.strip().split()
+    return " ".join(partes)
 
 
 def validar_autor(autor):
