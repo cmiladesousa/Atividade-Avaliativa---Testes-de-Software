@@ -11,7 +11,28 @@ O sistema permite cadastrar, consultar, emprestar e devolver livros, além de co
 - Unittest
 - SQLite
 
-## Participantes
+## Estrutura do projeto
 
-- Camila de Sousa Teixeira
-- Nathalia Emmily Floripes Castro
+```text
+.
+├── biblioteca/
+│   ├── biblioteca.py
+│   ├── database.py
+│   ├── livro.py
+│   ├── main.py
+│   ├── repository.py
+│   └── validators.py
+│
+├── tests/
+│   ├── test_biblioteca.py
+│   ├── test_integracao.py
+│   ├── test_livro.py
+│   ├── test_repository.py
+│   └── test_validadores.py
+│
+├── tests_unittest/
+│   ├── test_biblioteca_unittest.py
+│   └── test_validadores_unittest.py
+│
+├── biblioteca.db
+└── README.md
