@@ -1,6 +1,5 @@
 import sqlite3
 
-
 DATABASE_NAME = "biblioteca.db"
 
 
@@ -8,8 +7,12 @@ def conectar():
     return sqlite3.connect(DATABASE_NAME)
 
 
-def inicializar_banco():
-    conexao = conectar()
+def inicializar_banco(conexao=None):
+    fechar_conexao = False
+
+    if conexao is None:
+        conexao = conectar()
+        fechar_conexao = True
 
     cursor = conexao.cursor()
 
@@ -25,4 +28,6 @@ def inicializar_banco():
     )
 
     conexao.commit()
-    conexao.close()
+
+    if fechar_conexao:
+        conexao.close()

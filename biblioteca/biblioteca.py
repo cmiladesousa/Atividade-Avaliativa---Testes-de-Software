@@ -1,14 +1,17 @@
 import sqlite3
 
-from livro import Livro
-from repository import LivroRepository
-from validators import validar_livro, validar_isbn
+from .livro import Livro
+from .repository import LivroRepository
+from .validators import validar_livro, validar_isbn
 
 
 class Biblioteca:
+    
+    def __init__(self, repository=None):
+        if repository is None:
+            repository = LivroRepository()
 
-    def __init__(self):
-        self.repository = LivroRepository()
+        self.repository = repository
 
     def cadastrar_livro(self, isbn, titulo, autor, quantidade):
         isbn, titulo, autor, quantidade = validar_livro(

@@ -1,13 +1,14 @@
 import unittest
 from unittest.mock import patch
 
-from biblioteca.biblioteca import cadastrar_livro
+from biblioteca.biblioteca import Biblioteca
 
 
 class TestBiblioteca(unittest.TestCase):
 
     @patch("biblioteca.biblioteca.LivroRepository")
     def test_cadastrar_livro_valido(self, MockRepository):
+        biblioteca = Biblioteca()
         isbn = "978-3-16-148410-0"
         titulo = "O Senhor dos Anéis"
         autor = "J.R.R. Tolkien"
@@ -17,7 +18,7 @@ class TestBiblioteca(unittest.TestCase):
 
         repository_mock.buscar_por_isbn.return_value = None
 
-        livro = cadastrar_livro(
+        livro = biblioteca.cadastrar_livro(
             isbn,
             titulo,
             autor,
@@ -40,13 +41,14 @@ class TestBiblioteca(unittest.TestCase):
 
 
     def test_cadastrar_livro_invalido(self):
+        biblioteca = Biblioteca()
         isbn = "978-3-16-148410-0a"
         titulo = "O Senhor dos Anéis"
         autor = "J.R.R. Tolkien"
         quantidade = 5
 
         with self.assertRaises(ValueError):
-            cadastrar_livro(
+           biblioteca.cadastrar_livro(
                 isbn,
                 titulo,
                 autor,
