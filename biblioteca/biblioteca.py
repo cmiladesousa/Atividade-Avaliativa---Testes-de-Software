@@ -6,7 +6,7 @@ from .validators import validar_livro, validar_isbn
 
 
 class Biblioteca:
-    
+
     def __init__(self, repository=None):
         if repository is None:
             repository = LivroRepository()
@@ -59,7 +59,7 @@ class Biblioteca:
         livro = self.consultar_livro(isbn)
 
         return livro.esta_disponivel()
-
+    
     def emprestar_livro(self, isbn):
         livro = self.consultar_livro(isbn)
 
@@ -76,7 +76,25 @@ class Biblioteca:
         )
 
         return livro
-
+    """
+    # Versão com erro proposital para teste de integração, com decremento de 2 exemplares ao invés de 1
+    def emprestar_livro(self, isbn):
+        livro = self.consultar_livro(isbn)
+    
+        if not livro.esta_disponivel():
+            raise ValueError(
+                f"Não há exemplares disponíveis de '{livro.titulo}'."
+            )
+    
+        livro.quantidade_disponivel -= 2
+    
+        self.repository.atualizar_quantidade(
+            livro.isbn,
+            livro.quantidade_disponivel,
+        )
+    
+        return livro
+    """
     def devolver_livro(self, isbn):
         livro = self.consultar_livro(isbn)
 
