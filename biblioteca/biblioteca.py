@@ -76,7 +76,9 @@ class Biblioteca:
         )
 
         return livro
+    
     """
+    # Parte referente a questão 13
     # Versão com erro proposital para teste de integração, com decremento de 2 exemplares ao invés de 1
     def emprestar_livro(self, isbn):
         livro = self.consultar_livro(isbn)

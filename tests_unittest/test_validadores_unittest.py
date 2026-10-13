@@ -5,6 +5,8 @@ from biblioteca.validators import (
     validar_quantidade
 )
 
+#Parte referente a questão 3
+
 class TestValidadores(unittest.TestCase):
     def test_validar_isbn_valido(self):
         isbn = "978-3-16-148410-0"

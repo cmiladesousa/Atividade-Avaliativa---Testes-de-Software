@@ -4,7 +4,8 @@ from unittest.mock import patch
 from biblioteca.livro import Livro
 from biblioteca.biblioteca import Biblioteca
 
-
+#Parte referente a questão 5: cadastrar_livro_invalido, cadastrar_livro_existente, emprestar_livro_inexistente, emprestar_livro_indisponivel, devolver_livro_inexistente
+#Parte referente a questão 7: Isolamento de dependências com Mock/Patch
 class TestBiblioteca:
     
     @patch("biblioteca.biblioteca.LivroRepository")
