@@ -1,5 +1,5 @@
 from biblioteca import Biblioteca
-from database import inicializar_banco
+from database import inicializar_banco    
 
 
 def mostrar_menu():
