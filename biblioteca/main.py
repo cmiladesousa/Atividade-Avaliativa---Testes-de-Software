@@ -1,5 +1,7 @@
-from biblioteca import Biblioteca
-from database import inicializar_banco    
+import sqlite3
+
+from .biblioteca import Biblioteca
+from .database import inicializar_banco
 
 
 def mostrar_menu():
@@ -10,6 +12,11 @@ def mostrar_menu():
     print("4 - Realizar empréstimo")
     print("5 - Realizar devolução")
     print("6 - Listar livros")
+    print("7 - Cadastrar usuário")
+    print("8 - Consultar usuário")
+    print("9 - Verificar possibilidade de empréstimo")
+    print("10 - Verificar multa pendente")
+    print("11 - Calcular multa")
     print("0 - Sair")
 
 
@@ -25,6 +32,7 @@ def main():
 
         try:
 
+            # Cadastro de livro
             if opcao == "1":
                 isbn = input("ISBN: ")
                 titulo = input("Título: ")
@@ -43,6 +51,7 @@ def main():
                 print("\nLivro cadastrado com sucesso!")
                 print(livro)
 
+            # Consulta de livro
             elif opcao == "2":
                 isbn = input("ISBN: ")
 
@@ -51,6 +60,7 @@ def main():
                 print()
                 print(livro)
 
+            # Verificação de disponibilidade
             elif opcao == "3":
                 isbn = input("ISBN: ")
 
@@ -63,28 +73,51 @@ def main():
                 else:
                     print("Livro indisponível.")
 
+            # Realização de empréstimo
             elif opcao == "4":
                 isbn = input("ISBN: ")
+                usuario_id = int(input("ID do usuário: "))
 
-                livro = biblioteca.emprestar_livro(isbn)
+                livro = biblioteca.emprestar_livro(
+                    isbn,
+                    usuario_id,
+                )
 
-                print("Empréstimo realizado com sucesso.")
+                print("\nEmpréstimo realizado com sucesso.")
                 print(
                     f"Exemplares restantes: "
                     f"{livro.quantidade_disponivel}"
                 )
 
+            # Realização de devolução
             elif opcao == "5":
                 isbn = input("ISBN: ")
+                usuario_id = int(input("ID do usuário: "))
 
-                livro = biblioteca.devolver_livro(isbn)
+                dias_atraso = int(
+                    input("Quantidade de dias de atraso: ")
+                )
 
-                print("Devolução realizada com sucesso.")
+                livro = biblioteca.devolver_livro(
+                    isbn,
+                    usuario_id,
+                    dias_atraso,
+                )
+
+                multa = biblioteca.calcular_multa(dias_atraso)
+
+                print("\nDevolução realizada com sucesso.")
                 print(
                     f"Exemplares disponíveis: "
                     f"{livro.quantidade_disponivel}"
                 )
 
+                if multa > 0:
+                    print(f"Multa aplicada: R$ {multa:.2f}")
+                else:
+                    print("Nenhuma multa aplicada.")
+
+            # Listagem de livros
             elif opcao == "6":
                 livros = biblioteca.listar_livros()
 
@@ -95,6 +128,102 @@ def main():
                     print("\n----------------------")
                     print(livro)
 
+            # Cadastro de usuário
+            elif opcao == "7":
+                nome = input("Nome do usuário: ")
+
+                situacao = input(
+                    "Usuário ativo? (S/N): "
+                ).strip().upper()
+
+                if situacao not in ("S", "N"):
+                    raise ValueError(
+                        "Informe S para ativo ou N para inativo."
+                    )
+
+                ativo = situacao == "S"
+
+                usuario = biblioteca.cadastrar_usuario(
+                    nome,
+                    ativo,
+                )
+
+                print("\nUsuário cadastrado com sucesso!")
+                print(f"ID: {usuario.id}")
+                print(f"Nome: {usuario.nome}")
+                print(
+                    f"Situação: "
+                    f"{'Ativo' if usuario.ativo else 'Inativo'}"
+                )
+
+            # Consulta de usuário
+            elif opcao == "8":
+                usuario_id = int(input("ID do usuário: "))
+
+                usuario = biblioteca.consultar_usuario(
+                    usuario_id
+                )
+
+                print("\n===== DADOS DO USUÁRIO =====")
+                print(f"ID: {usuario.id}")
+                print(f"Nome: {usuario.nome}")
+                print(
+                    f"Situação: "
+                    f"{'Ativo' if usuario.ativo else 'Inativo'}"
+                )
+                print(f"Multa pendente: R$ {usuario.multa:.2f}")
+
+            # Verificação da possibilidade de empréstimo
+            elif opcao == "9":
+                isbn = input("ISBN: ")
+                usuario_id = int(input("ID do usuário: "))
+
+                permitido = biblioteca.verificar_emprestimo(
+                    isbn,
+                    usuario_id,
+                )
+
+                if permitido:
+                    print("\nEmpréstimo permitido.")
+
+                else:
+                    print("\nEmpréstimo não permitido.")
+
+            # Verificação de multa pendente
+            elif opcao == "10":
+                usuario_id = int(input("ID do usuário: "))
+
+                possui_multa = biblioteca.verificar_multa(
+                    usuario_id
+                )
+
+                if possui_multa:
+                    usuario = biblioteca.consultar_usuario(
+                        usuario_id
+                    )
+
+                    print("\nO usuário possui multa pendente.")
+                    print(
+                        f"Valor total: R$ {usuario.multa:.2f}"
+                    )
+
+                else:
+                    print("\nO usuário não possui multas pendentes.")
+
+            # Cálculo de multa
+            elif opcao == "11":
+                dias_atraso = int(
+                    input("Quantidade de dias de atraso: ")
+                )
+
+                multa = biblioteca.calcular_multa(
+                    dias_atraso
+                )
+
+                print(f"\nDias de atraso: {dias_atraso}")
+                print(f"Valor da multa: R$ {multa:.2f}")
+
+            # Encerramento
             elif opcao == "0":
                 print("Sistema encerrado.")
                 break
@@ -104,6 +233,9 @@ def main():
 
         except ValueError as erro:
             print(f"\nErro: {erro}")
+
+        except sqlite3.Error as erro:
+            print(f"\nErro de persistência: {erro}")
 
         except Exception as erro:
             print(f"\nErro inesperado: {erro}")

@@ -2,7 +2,7 @@ import sqlite3
 
 from .livro import Livro
 from .repository import LivroRepository
-from .validators import validar_livro, validar_isbn
+from .validators import validar_dias_atraso, validar_livro, validar_isbn
 
 
 class Biblioteca:
@@ -43,10 +43,17 @@ class Biblioteca:
 
         return livro
 
-    def consultar_livro(self, isbn):
+    def consultar_livro(self, isbn, *, conexao=None):
+
         isbn = validar_isbn(isbn)
 
-        livro = self.repository.buscar_por_isbn(isbn)
+        if conexao is None:
+            livro = self.repository.buscar_por_isbn(isbn)
+        else:
+            livro = self.repository.buscar_por_isbn(
+                isbn,
+                conexao=conexao,
+            )
 
         if livro is None:
             raise ValueError(
@@ -60,20 +67,50 @@ class Biblioteca:
 
         return livro.esta_disponivel()
     
-    def emprestar_livro(self, isbn):
-        livro = self.consultar_livro(isbn)
+    def emprestar_livro(self, isbn, usuario_id):
 
-        if not livro.esta_disponivel():
-            raise ValueError(
-                f"Não há exemplares disponíveis de '{livro.titulo}'."
+        with self.repository.transacao() as conexao:
+
+            livro = self.consultar_livro(
+                isbn,
+                conexao=conexao,
             )
 
-        livro.quantidade_disponivel -= 1
+            usuario = self.consultar_usuario(
+                usuario_id,
+                conexao=conexao,
+            )
 
-        self.repository.atualizar_quantidade(
-            livro.isbn,
-            livro.quantidade_disponivel,
-        )
+            if not usuario.esta_ativo():
+                raise ValueError(
+                    "O usuário está inativo."
+                )
+
+            if not livro.esta_disponivel():
+                raise ValueError(
+                    f"Não há exemplares disponíveis de '{livro.titulo}'."
+                )
+
+            if usuario.possui_multa():
+                raise ValueError(
+                    "O usuário possui multas pendentes."
+                )
+
+            nova_quantidade = livro.quantidade_disponivel - 1
+
+            self.repository.atualizar_quantidade(
+                livro.isbn,
+                nova_quantidade,
+                conexao=conexao,
+            )
+
+            self.repository.registrar_emprestimo(
+                livro.isbn,
+                usuario.id,
+                conexao=conexao,
+            )
+
+        livro.quantidade_disponivel = nova_quantidade
 
         return livro
     
@@ -97,17 +134,122 @@ class Biblioteca:
     
         return livro
     """
-    def devolver_livro(self, isbn):
-        livro = self.consultar_livro(isbn)
+    def calcular_multa(self, dias_atraso):
 
-        livro.quantidade_disponivel += 1
+        dias_atraso = validar_dias_atraso(dias_atraso)
 
-        self.repository.atualizar_quantidade(
-            livro.isbn,
-            livro.quantidade_disponivel,
-        )
+        return dias_atraso * 2
+
+    def devolver_livro(self, isbn, usuario_id, dias_atraso=0):
+
+        multa = self.calcular_multa(dias_atraso)
+
+        with self.repository.transacao() as conexao:
+
+            livro = self.consultar_livro(
+                isbn,
+                conexao=conexao,
+            )
+
+            usuario = self.consultar_usuario(
+                usuario_id,
+                conexao=conexao,
+            )
+
+            emprestimo = self.repository.buscar_emprestimo_ativo(
+                livro.isbn,
+                usuario.id,
+                conexao=conexao,
+            )
+
+            if emprestimo is None:
+                raise ValueError(
+                    "Não existe empréstimo ativo correspondente."
+                )
+
+            nova_quantidade = livro.quantidade_disponivel + 1
+
+            self.repository.encerrar_emprestimo(
+                emprestimo.id,
+                conexao=conexao,
+            )
+
+            self.repository.atualizar_quantidade(
+                livro.isbn,
+                nova_quantidade,
+                conexao=conexao,
+            )
+
+            if multa > 0:
+                self.repository.adicionar_multa(
+                    usuario.id,
+                    multa,
+                    conexao=conexao,
+                )
+
+        livro.quantidade_disponivel = nova_quantidade
 
         return livro
 
     def listar_livros(self):
         return self.repository.listar_todos()
+
+    def cadastrar_usuario(self, nome, ativo=True):
+
+        if not isinstance(nome, str) or not nome.strip():
+            raise ValueError("O nome do usuário não pode ser vazio.")
+
+        if not isinstance(ativo, bool):
+            raise ValueError("A situação do usuário deve ser booleana.")
+
+        return self.repository.salvar_usuario(
+            nome.strip(),
+            ativo,
+        )
+
+    def consultar_usuario(self, usuario_id, *, conexao=None):
+
+        if (
+            isinstance(usuario_id, bool)
+            or not isinstance(usuario_id, int)
+            or usuario_id <= 0
+        ):
+            raise ValueError("Identificador de usuário inválido.")
+
+        usuario = self.repository.buscar_usuario(
+            usuario_id,
+            conexao=conexao,
+        )
+
+        if usuario is None:
+            raise ValueError(
+                f"Usuário {usuario_id} não encontrado."
+            )
+
+        return usuario
+
+    def verificar_multa(self, usuario_id):
+
+        usuario = self.consultar_usuario(usuario_id)
+
+        return usuario.possui_multa()
+
+    def verificar_emprestimo(self, isbn, usuario_id):
+
+        with self.repository.transacao() as conexao:
+
+            livro = self.consultar_livro(
+                isbn,
+                conexao=conexao,
+            )
+
+            usuario = self.consultar_usuario(
+                usuario_id,
+                conexao=conexao,
+            )
+
+            return (
+                usuario.esta_ativo()
+                and livro.esta_disponivel()
+                and not usuario.possui_multa()
+            )

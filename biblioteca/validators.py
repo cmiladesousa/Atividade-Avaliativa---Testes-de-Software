@@ -48,3 +48,16 @@ def validar_livro(isbn, titulo, autor, quantidade):
         validar_autor(autor),
         validar_quantidade(quantidade),
     )
+
+def validar_dias_atraso(dias_atraso):
+
+    if isinstance(dias_atraso, bool):
+        raise ValueError("Os dias de atraso devem ser inteiros.")
+
+    if not isinstance(dias_atraso, int):
+        raise ValueError("Os dias de atraso devem ser inteiros.")
+
+    if dias_atraso < 0:
+        raise ValueError("Os dias de atraso não podem ser negativos.")
+
+    return dias_atraso
