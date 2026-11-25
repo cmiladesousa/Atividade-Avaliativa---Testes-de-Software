@@ -7,8 +7,7 @@ from biblioteca.repository import LivroRepository
 from biblioteca.database import inicializar_banco, DATABASE_NAME
 
 #referente a questão 9
-@pytest.fixture
-def biblioteca_teste(tmp_path):
+def biblioteca_teste():
     caminho_banco = tmp_path / "biblioteca_teste.db"
 
     conexao = sqlite3.connect(caminho_banco)
@@ -167,3 +166,32 @@ def test_persistencia_livro(banco_teste):
         livro_recuperado.quantidade_disponivel
         == livro.quantidade_disponivel
     )
+
+def test_isbn_duplicado_integracao(biblioteca_teste):
+    biblioteca = biblioteca_teste
+
+    biblioteca.cadastrar_livro(
+        "1234567890",
+        "Introdução à Física",
+        "Autor Original",
+        5,
+    )
+
+    with pytest.raises(ValueError):
+        biblioteca.cadastrar_livro(
+            "1234567890",
+            "Outro Livro",
+            "Outro Autor",
+            10,
+        )
+
+    livros = biblioteca.listar_livros()
+
+    assert len(livros) == 1
+
+    livro = biblioteca.consultar_livro("1234567890")
+
+    assert livro.isbn == "1234567890"
+    assert livro.titulo == "Introdução à Física"
+    assert livro.autor == "Autor Original"
+    assert livro.quantidade_disponivel == 5

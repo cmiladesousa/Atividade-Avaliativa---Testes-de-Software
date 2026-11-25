@@ -253,3 +253,5 @@ class Biblioteca:
                 and livro.esta_disponivel()
                 and not usuario.possui_multa()
             )
+
+   

@@ -4,7 +4,11 @@ DATABASE_NAME = "biblioteca.db"
 
 
 def conectar():
-    return sqlite3.connect(DATABASE_NAME)
+    conexao = sqlite3.connect(DATABASE_NAME)
+
+    conexao.execute("PRAGMA foreign_keys = ON")
+
+    return conexao
 
 
 def inicializar_banco(conexao=None):
@@ -14,41 +18,42 @@ def inicializar_banco(conexao=None):
         conexao = conectar()
         fechar_conexao = True
 
-    cursor = conexao.cursor()
+    try:
+        cursor = conexao.cursor()
 
-    cursor.execute(
-        """
-        CREATE TABLE IF NOT EXISTS livros (
-            isbn TEXT PRIMARY KEY,
-            titulo TEXT NOT NULL,
-            autor TEXT NOT NULL,
-            quantidade_disponivel INTEGER NOT NULL
+        cursor.executescript(
+            """
+            CREATE TABLE IF NOT EXISTS livros (
+                isbn TEXT PRIMARY KEY,
+                titulo TEXT NOT NULL,
+                autor TEXT NOT NULL,
+                quantidade_disponivel INTEGER NOT NULL
+            );
+
+            CREATE TABLE IF NOT EXISTS usuarios (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                nome TEXT NOT NULL,
+                ativo INTEGER NOT NULL DEFAULT 1
+                    CHECK (ativo IN (0, 1)),
+                multa INTEGER NOT NULL DEFAULT 0
+                    CHECK (multa >= 0)
+            );
+
+            CREATE TABLE IF NOT EXISTS emprestimos (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                isbn TEXT NOT NULL,
+                usuario_id INTEGER NOT NULL,
+                ativo INTEGER NOT NULL DEFAULT 1
+                    CHECK (ativo IN (0, 1)),
+
+                FOREIGN KEY (isbn) REFERENCES livros(isbn),
+                FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
+            );
+            """
         )
 
-        CREATE TABLE IF NOT EXISTS usuarios (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            nome TEXT NOT NULL,
-            ativo INTEGER NOT NULL DEFAULT 1
-                CHECK (ativo IN (0, 1)),
-            multa INTEGER NOT NULL DEFAULT 0
-                CHECK (multa >= 0)
-        );
+        conexao.commit()
 
-        CREATE TABLE IF NOT EXISTS emprestimos (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            isbn TEXT NOT NULL,
-            usuario_id INTEGER NOT NULL,
-            ativo INTEGER NOT NULL DEFAULT 1
-                CHECK (ativo IN (0, 1)),
-
-            FOREIGN KEY (isbn) REFERENCES livros(isbn),
-            FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
-        );
-        """
-    )
-
-    conexao.execute("PRAGMA foreign_keys = ON")
-    conexao.commit()
-
-    if fechar_conexao:
-        conexao.close()
+    finally:
+        if fechar_conexao:
+            conexao.close()

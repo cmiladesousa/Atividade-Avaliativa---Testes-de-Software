@@ -230,3 +230,32 @@ class LivroRepository:
 
         if cursor.rowcount != 1:
             raise ValueError("Usuário não encontrado.")
+
+    def listar_todos(self):
+        
+        with self._usar_conexao() as conn:
+
+            resultados = conn.execute(
+                """
+                SELECT isbn, titulo, autor, quantidade_disponivel
+                FROM livros
+                ORDER BY titulo
+                """
+            ).fetchall()
+
+            livros = []
+
+            for resultado in resultados:
+                livros.append(
+                    Livro(
+                        isbn=resultado[0],
+                        titulo=resultado[1],
+                        autor=resultado[2],
+                        quantidade_disponivel=resultado[3],
+                    )
+                )
+
+            return livros
+            
+                
+           
