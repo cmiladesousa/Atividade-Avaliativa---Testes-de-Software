@@ -66,13 +66,14 @@ def validar_livro(isbn, titulo, autor, quantidade):
 
 
 def validar_dias_atraso(dias_atraso):
-    if isinstance(dias_atraso, bool):
-        raise ValueError("Os dias de atraso não podem ser booleanos.")
 
-    if not isinstance(dias_atraso, int):
-        raise ValueError("Os dias de atraso devem ser inteiros.")
+    if isinstance(dias_atraso, bool):                        # I1
+        raise ValueError("Os dias de atraso não podem ser booleanos.")  # I2
 
-    if dias_atraso < 0:
-        raise ValueError("Os dias de atraso não podem ser negativos.")
+    if not isinstance(dias_atraso, int):                     # I3
+        raise ValueError("Os dias de atraso devem ser inteiros.")       # I4
 
-    return dias_atraso
+    if dias_atraso < 0:                                      # I5
+        raise ValueError("Os dias de atraso não podem ser negativos.")  # I6
+
+    return dias_atraso                                       # I7
