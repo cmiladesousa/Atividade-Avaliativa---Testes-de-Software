@@ -1,0 +1,37 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-9.1.1, pluggy-1.6.0 -- /home/camila/Documentos/Testes de Software/Atividade Avaliativa - Testes de Software/.venv/bin/python
+cachedir: .pytest_cache
+rootdir: /home/camila/Documentos/Testes de Software/Atividade Avaliativa - Testes de Software
+plugins: cov-7.1.0
+collecting ... collected 8 items
+
+tests/test_cenarios.py::test_cenario_emprestimo_sucesso 
+Estado persistido: {'livros': [('1234567890', 'Física', 'Newton', 4)], 'usuarios': [(1, 'Ana', 1, 0)], 'emprestimos': [(1, '1234567890', 1, 1)]}
+PASSED
+tests/test_cenarios.py::test_cenario_livro_indisponivel 
+Estado preservado: {'livros': [('1234567890', 'Física', 'Newton', 0)], 'usuarios': [(1, 'Ana', 1, 0), (2, 'Pedro', 1, 0)], 'emprestimos': [(1, '1234567890', 2, 1)]}
+PASSED
+tests/test_cenarios.py::test_cenario_multa_pendente 
+Estado preservado: {'livros': [('1234567890', 'Física', 'Newton', 5)], 'usuarios': [(1, 'Ana', 1, 10)], 'emprestimos': [(1, '1234567890', 1, 0)]}
+PASSED
+tests/test_cenarios.py::test_cenario_usuario_inativo 
+Estado preservado: {'livros': [('1234567890', 'Física', 'Newton', 5)], 'usuarios': [(1, 'Ana', 0, 0)], 'emprestimos': []}
+PASSED
+tests/test_cenarios.py::test_cenario_isbn_inexistente 
+Estado preservado: {'livros': [('1234567890', 'Física', 'Newton', 5)], 'usuarios': [(1, 'Ana', 1, 0)], 'emprestimos': []}
+PASSED
+tests/test_cenarios.py::test_cenario_falha_persistencia 
+Dentro da transação:
+Estoque: 4
+Empréstimos registrados: 1
+
+Após rollback: {'livros': [('1234567890', 'Física', 'Newton', 5)], 'usuarios': [(1, 'Ana', 1, 0)], 'emprestimos': []}
+PASSED
+tests/test_cenarios.py::test_cenario_devolucao_valida 
+Estado após devolução: {'livros': [('1234567890', 'Física', 'Newton', 5)], 'usuarios': [(1, 'Ana', 1, 10)], 'emprestimos': [(1, '1234567890', 1, 0)]}
+PASSED
+tests/test_cenarios.py::test_cenario_devolucao_repetida 
+Estado após devolução repetida: {'livros': [('1234567890', 'Física', 'Newton', 5)], 'usuarios': [(1, 'Ana', 1, 10)], 'emprestimos': [(1, '1234567890', 1, 0)]}
+PASSED
+
+============================== 8 passed in 0.46s ===============================
