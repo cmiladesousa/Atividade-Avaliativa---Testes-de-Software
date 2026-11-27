@@ -253,5 +253,26 @@ class Biblioteca:
                 and livro.esta_disponivel()
                 and not usuario.possui_multa()
             )
+    def quitar_multa(self, usuario_id):
 
-   
+        with self.repository.transacao() as conexao:
+
+            usuario = self.consultar_usuario(
+                usuario_id,
+                conexao=conexao,
+            )
+
+            if not usuario.possui_multa():
+                raise ValueError(
+                    "O usuário não possui multas pendentes."
+                )
+
+            valor_pago = usuario.multa
+
+            self.repository.quitar_multa(
+                usuario.id,
+                conexao=conexao,
+            )
+
+        return valor_pago
+    

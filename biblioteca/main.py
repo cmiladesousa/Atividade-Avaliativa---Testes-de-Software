@@ -17,6 +17,7 @@ def mostrar_menu():
     print("9 - Verificar possibilidade de empréstimo")
     print("10 - Verificar multa pendente")
     print("11 - Calcular multa")
+    print("12 - Quitar multa")
     print("0 - Sair")
 
 
@@ -222,6 +223,31 @@ def main():
 
                 print(f"\nDias de atraso: {dias_atraso}")
                 print(f"Valor da multa: R$ {multa:.2f}")
+
+            # Quitar multa
+            elif opcao == "12":
+                usuario_id = int(input("ID do usuário: "))
+
+                usuario = biblioteca.consultar_usuario(usuario_id)
+
+                print(f"Multa pendente: R$ {usuario.multa:.2f}")
+
+                confirmacao = input(
+                    "Confirmar pagamento? (S/N): "
+                ).strip().upper()
+
+                if confirmacao == "S":
+
+                    valor_pago = biblioteca.quitar_multa(usuario_id)
+
+                    print("\nMulta quitada com sucesso!")
+                    print(f"Valor pago: R$ {valor_pago:.2f}")
+
+                elif confirmacao == "N":
+                    print("Pagamento cancelado.")
+
+                else:
+                    print("Opção inválida.")
 
             # Encerramento
             elif opcao == "0":

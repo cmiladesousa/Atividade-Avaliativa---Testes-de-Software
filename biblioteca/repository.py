@@ -257,5 +257,17 @@ class LivroRepository:
 
             return livros
             
-                
-           
+    def quitar_multa(self, usuario_id, *, conexao):
+
+        cursor = conexao.execute(
+            """
+            UPDATE usuarios
+            SET multa = 0
+            WHERE id = ?
+            """,
+            (usuario_id,),
+        )
+
+        if cursor.rowcount != 1:
+            raise ValueError("Usuário não encontrado.")           
+            
