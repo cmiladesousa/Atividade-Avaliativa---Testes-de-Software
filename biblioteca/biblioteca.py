@@ -194,6 +194,14 @@ class Biblioteca:
     def listar_livros(self):
         return self.repository.listar_todos()
 
+    #contagem_livros_disponiveis: criado para a questão 8:
+    def contagem_livros_disponiveis(self):
+        total = 0
+        for livro in self.listar_livros():
+            if livro.esta_disponivel():
+                total += 1
+        return total
+
     def cadastrar_usuario(self, nome, ativo=True):
 
         if not isinstance(nome, str) or not nome.strip():
